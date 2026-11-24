@@ -1,32 +1,37 @@
 # Supernova TinyDB
 
-Supernova DB provides persistent database APIs for static websites, with project-scoped credentials and a small developer dashboard.
+Supernova DB is a persistent backend-as-a-service for static websites.
 
-## Run locally
-
-Requires Node.js 20+ and a C++ build toolchain for `better-sqlite3`.
+## Run
 
 ```sh
 cp .env.example .env
 npm install
+npm run sdk:build
 npm start
 ```
 
-Visit `http://localhost:3000`. For local verification, a one-time email link is printed in the server log. After verification and sign-in, create a project and collection. This development verification mechanism is not production email delivery.
+Requires Node.js 20+.
 
-## Current database support
+## Storage providers
 
-SQLite is the only implemented storage engine in this version. The app persists metadata and records in SQLite with WAL, foreign keys, composite project/collection scoping, and indexed pagination. PostgreSQL and MongoDB are not yet selectable providers; the architecture does not currently allow arbitrary database providers. See [deployment guidance](docs/DEPLOYMENT.md) before deploying.
+SQLite is enabled end-to-end. PostgreSQL and MongoDB provider adapters are present as integrations requiring deployment credentials and provider-specific validation. MySQL is an optional package placeholder. Never expose database URLs to the browser.
 
-## Public API and SDK
+Create projects using `POST /v1/dashboard/projects` with `database_provider: "sqlite"`, or a trusted server-provisioned URI for PostgreSQL/MongoDB.
 
-The public credential is read-only by default. See [API reference](docs/API.md) and [getting started](docs/GETTING_STARTED.md). Build the browser asset with `npm run sdk:build`.
+## Features
 
-## Tests and backup
+- Email registration and verification
+- Secure login sessions
+- Project and credential management
+- Public/project credential validation
+- Collection and record CRUD
+- Collection-level public permissions
+- Browser SDK
+- Professional dashboard
+- SQLite WAL persistence and online backup
+- Audit logs and pagination
+- Storage provider registry
+- Docker deployment
 
-```sh
-npm test
-npm run backup
-```
-
-This repository is an early, single-node implementation. It has not been load tested for millions of projects and is not production ready until the email delivery, operational controls, and security limitations in the deployment guide are addressed.
+See [API](docs/API.md), [getting started](docs/GETTING_STARTED.md), [deployment](docs/DEPLOYMENT.md), [backups](docs/BACKUP.md), and [security status](docs/SECURITY_STATUS.md).
