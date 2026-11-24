@@ -1,24 +1,37 @@
 const crypto = require('crypto');
 
-const HASH_PREFIX = 'scrypt$';
-function hashPassword(password) {
-  const salt = crypto.randomBytes(16).toString('hex');
-  const derived = crypto.scryptSync(password, salt, 64).toString('hex');
-  return `${HASH_PREFIX}${salt}$${derived}`;
+function csrfToken(sessionCookie) {
+  return crypto.createHmac('sha256', process.env.SESSION_SECRET || 'development-only-session-secret-change-me').update(sessionCookie).digest('base64url');
 }
-function verifyPassword(password, encoded) {
-  if (!encoded || !encoded.startsWith(HASH_PREFIX)) return false;
-  const [, salt, stored] = encoded.split('$');
-  const derived = crypto.scryptSync(password, salt, 64);
-  const actual = Buffer.from(stored, 'hex');
-  return actual.length === derived.length && crypto.timingSafeEqual(actual, derived);
+
+function dashboardCsrf(req, res, next) {
+  if (!['POST','PUT','PATCH','DELETE'].includes(req.method)) return next();
+  const session = req.cookies.supernova_session;
+  const supplied = req.get('X-CSRF-Token');
+  if (!session || !supplied || !crypto.timingSafeEqual(Buffer.from(csrfToken(session)), Buffer.from(supplied))) {
+    return res.status(403).json({ success:false, data:null, error:{ code:'ACCESS_DENIED', message:'CSRF validation failed.' } });
+  }
+  next();
 }
-function sha256(value) { return crypto.createHash('sha256').update(value).digest('hex'); }
-function randomSecret(bytes = 32) { return crypto.randomBytes(bytes).toString('base64url'); }
-function randomId(prefix) { return `${prefix}_${randomSecret(12)}`; }
-function timingSafeHashEqual(a, b) {
-  if (typeof a !== 'string' || typeof b !== 'string') return false;
-  const ah = Buffer.from(a); const bh = Buffer.from(b);
-  return ah.length === bh.length && crypto.timingSafeEqual(ah, bh);
+
+function validateObjectAgainstSchema(value, schema) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return 'A JSON object is required.';
+  const allowed = Object.keys(schema.properties || {});
+  if (schema.additionalProperties === false) {
+    const extra = Object.keys(value).find(key => !allowed.includes(key));
+    if (extra) return `Field "${extra}" is not allowed.`;
+  }
+  for (const required of schema.required || []) if (!Object.prototype.hasOwnProperty.call(value, required)) return `Missing required field: ${required}`;
+  for (const [key, rule] of Object.entries(schema.properties || {})) {
+    if (!Object.prototype.hasOwnProperty.call(value, key)) continue;
+    const field = value[key];
+    if (rule.type === 'string' && typeof field !== 'string') return `Field ${key} must be a string.`;
+    if (rule.type === 'number' && typeof field !== 'number') return `Field ${key} must be a number.`;
+    if (rule.type === 'integer' && !Number.isInteger(field)) return `Field ${key} must be an integer.`;
+    if (rule.type === 'boolean' && typeof field !== 'boolean') return `Field ${key} must be a boolean.`;
+    if (rule.type === 'array' && !Array.isArray(field)) return `Field ${key} must be an array.`;
+    if (typeof field === 'string' && rule.maxLength && field.length > rule.maxLength) return `Field ${key} is too long.`;
+  }
+  return null;
 }
-module.exports = { hashPassword, verifyPassword, sha256, randomSecret, randomId, timingSafeHashEqual };
+module.exports = { ...require('./security'), csrfToken, dashboardCsrf, validateObjectAgainstSchema };
