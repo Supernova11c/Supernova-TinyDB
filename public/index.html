@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10131e"><title>Supernova DB — Your data, your website</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/">✦ Supernova<span>DB</span></a><nav><a href="#features">Platform</a><a href="/docs/">Docs</a><button class="button quiet" id="nav-login">Sign in</button><button class="button primary" id="nav-signup">Get started</button></nav></header>
+  <main>
+    <section class="hero"><div class="eyebrow"><i></i> DATABASE INFRASTRUCTURE FOR THE OPEN WEB</div><h1>Your website deserves<br><span>a real database.</span></h1><p>Give any static site persistent data, secure project isolation, and a friendly database dashboard. No server to build or maintain.</p><div class="hero-actions"><button class="button primary large" id="hero-start">Create your free project <b>→</b></button><a class="button outline large" href="/docs/">Explore the API</a></div><div class="hero-note">✦ Read-only by default&nbsp; · &nbsp;Persistent storage&nbsp; · &nbsp;Simple JavaScript</div></section>
+    <section class="code-card"><div class="code-head"><div><i></i><i></i><i></i></div><span>your-static-site.js</span><button id="copy-example">Copy</button></div><pre><code><span class="pink">const</span> db = <span class="blue">new</span> SupernovaDB({
+  projectId: <span class="green">'YOUR_PROJECT_ID'</span>,
+  publicKey: <span class="green">'YOUR_PUBLIC_KEY'</span>
+});
+
+<span class="pink">const</span> notes = <span class="blue">await</span> db.collection(<span class="green">'notes'</span>).get();</code></pre></section>
+    <section class="features" id="features"><div><span class="feature-icon">▤</span><h3>Persistent by design</h3><p>Store records on the server, not in a browser tab. Your data is still there after refresh and sign-out.</p></div><div><span class="feature-icon">⌑</span><h3>Project isolation</h3><p>Every query is scoped to an authenticated project. One project's credentials cannot read another project's records.</p></div><div><span class="feature-icon">◈</span><h3>You set the rules</h3><p>Public keys are read-only by default. Choose collection-level insert, update, and delete permissions.</p></div></section>
+    <section class="auth-shell hidden" id="auth-shell"><div class="auth-card"><button class="close" id="auth-close" aria-label="Close">×</button><div class="eyebrow">SUPERNOVA ACCOUNT</div><h2 id="auth-title">Create your account</h2><p id="auth-help">Start with your email. Verify it before creating projects.</p><form id="auth-form"><label>Email<input name="email" type="email" autocomplete="email" required maxlength="254"></label><label>Password<input name="password" type="password" autocomplete="new-password" minlength="12" required></label><div class="hidden" id="project-fields"><label>Project name<input name="projectName" maxlength="100"></label><label>Description<input name="description" maxlength="500"></label></div><button class="button primary full" id="auth-submit">Create account</button></form><p class="notice" id="auth-notice" role="status"></p><button class="text-button" id="auth-switch">Already have an account? Sign in</button></div></section>
+    <section class="dashboard hidden" id="dashboard"><div class="dash-top"><div><div class="eyebrow">DEVELOPER CONSOLE</div><h2>Your projects</h2></div><div><span id="account-email"></span> <button class="button quiet" id="logout">Sign out</button></div></div><div id="project-grid" class="project-grid"></div><button class="button primary" id="new-project">＋ New project</button><div class="hidden" id="project-detail"></div></section>
+  </main><footer><span>✦ Supernova DB</span><span>Built for the open web. Secure by default.</span></footer>
+  <script src="/assets/app.js" defer></script>
+</body></html>

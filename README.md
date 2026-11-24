@@ -1,37 +1,32 @@
 # Supernova TinyDB
 
-Supernova DB is a persistent backend-as-a-service for static websites. It provides email authentication, project credential isolation, collection/record CRUD, an administration dashboard, and a browser SDK.
+Supernova DB provides persistent database APIs for static websites, with project-scoped credentials and a small developer dashboard.
 
-## Quick start
+## Run locally
 
-```bash
+Requires Node.js 20+ and a C++ build toolchain for `better-sqlite3`.
+
+```sh
 cp .env.example .env
 npm install
 npm start
 ```
 
-Open `http://localhost:3000`. SQLite is used locally and can be replaced by PostgreSQL-compatible storage for production deployments.
+Visit `http://localhost:3000`. For local verification, a one-time email link is printed in the server log. After verification and sign-in, create a project and collection. This development verification mechanism is not production email delivery.
 
-## Development
+## Current database support
 
-```bash
+SQLite is the only implemented storage engine in this version. The app persists metadata and records in SQLite with WAL, foreign keys, composite project/collection scoping, and indexed pagination. PostgreSQL and MongoDB are not yet selectable providers; the architecture does not currently allow arbitrary database providers. See [deployment guidance](docs/DEPLOYMENT.md) before deploying.
+
+## Public API and SDK
+
+The public credential is read-only by default. See [API reference](docs/API.md) and [getting started](docs/GETTING_STARTED.md). Build the browser asset with `npm run sdk:build`.
+
+## Tests and backup
+
+```sh
 npm test
-npm run dev
+npm run backup
 ```
 
-## Public API
-
-Send `X-Project-ID` and `X-Public-Key` headers.
-
-```js
-const response = await fetch('http://localhost:3000/v1/data/notes', {
-  headers: {
-    'X-Project-ID': 'YOUR_PROJECT_ID',
-    'X-Public-Key': 'YOUR_PUBLIC_KEY'
-  }
-});
-```
-
-Every response is JSON: `{ success, data, error }`. The public key starts with read-only access. Collection write permissions are disabled until explicitly configured by a dashboard administrator.
-
-See [docs/API.md](docs/API.md), [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md), and [docs/BACKUP.md](docs/BACKUP.md).
+This repository is an early, single-node implementation. It has not been load tested for millions of projects and is not production ready until the email delivery, operational controls, and security limitations in the deployment guide are addressed.
